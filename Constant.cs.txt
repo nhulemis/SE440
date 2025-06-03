@@ -1,1 +1,2 @@
 private float MoveSpeed = 5;
+public string MAP_NAME = "abc";
