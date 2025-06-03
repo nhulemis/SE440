@@ -5,9 +5,4 @@ public class MainCharacterController : Monobehaviour
     {
 
     }
-
-    void FixedUpdate()
-    {
-        
-    }
 }
