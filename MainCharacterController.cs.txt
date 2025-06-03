@@ -1,5 +1,8 @@
 
 public class MainCharacterController : Monobehaviour
 {
-    
+    void Start()
+    {
+
+    }
 }
