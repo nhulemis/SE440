@@ -12,6 +12,8 @@ namespace Multiplayer
         [SerializeField] Button joinRoomButton;
         [SerializeField] Button leaveRoomButton;
         [SerializeField] GameObject roomItemPrefab;
+        [SerializeField] string gameSceneName = "GameScene";
+        [SerializeField] int maxPlayersPerRoom = 2;
         private void Start()
         {
             leaveRoomButton.gameObject.SetActive(false);
@@ -24,9 +26,19 @@ namespace Multiplayer
             {
                 Debug.Log("Connecting to Photon Network...");
                 PhotonNetwork.ConnectUsingSettings();
+                PhotonNetwork.AutomaticallySyncScene = true;
             }
         }
         
+        public override void OnPlayerEnteredRoom(Player newPlayer)
+        {
+            base.OnPlayerEnteredRoom(newPlayer);
+            
+            Debug.Log($"Player entered room. {newPlayer.ActorNumber}");
+            if(PhotonNetwork.CountOfPlayers >= maxPlayersPerRoom)
+                PhotonNetwork.LoadLevel(gameSceneName);
+        }
+
         public override void OnConnectedToMaster()
         {
             Debug.Log("Connected to Photon Master Server.");
@@ -41,7 +53,10 @@ namespace Multiplayer
 
         public void JoinRoom()
         {
-            PhotonNetwork.JoinRandomOrCreateRoom();
+            PhotonNetwork.JoinRandomOrCreateRoom(roomName:"room 123",roomOptions: new RoomOptions()
+            {
+                MaxPlayers = maxPlayersPerRoom,
+            });
         }
         
         public override void OnJoinedRoom()
@@ -49,6 +64,10 @@ namespace Multiplayer
             Debug.Log("Joined a room successfully.");
             joinRoomButton.gameObject.SetActive(false);
             leaveRoomButton.gameObject.SetActive(true);
+            if (maxPlayersPerRoom == 1)
+            {
+                PhotonNetwork.LoadLevel(gameSceneName);
+            }
         }
 
         public override void OnRoomListUpdate(List<RoomInfo> roomList)

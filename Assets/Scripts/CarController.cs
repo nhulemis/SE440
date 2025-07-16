@@ -1,11 +1,17 @@
 using System;
 using System.Collections.Generic;
+using Photon.Pun;
+using Photon.Pun.Demo.SlotRacer;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace DefaultNamespace
 {
-    public class CarController : MonoBehaviour
+    public class CarController : MonoBehaviour , IPunObservable
     {
+        [SerializeField] PhotonView photonView;
+        PlayerControl playerControl;
         public enum WheelType
         {
             FrontLeft,
@@ -33,10 +39,17 @@ namespace DefaultNamespace
         [SerializeField] private bool canControl;
         
         private float currentSpeed = 0f;
-        
-        private void Update()
+
+        public void OnMove(InputValue value)
         {
-            HandleInput();
+            if (!photonView.IsMine) return;
+            Vector2 input = value.Get<Vector2>();
+            ApplyInput(input.x, input.y);
+        }
+
+        private void FixedUpdate()
+        {
+            if (!photonView.IsMine) return;
             UpdateWheels();
         }
 
@@ -91,6 +104,28 @@ namespace DefaultNamespace
             float horizontalInput = Input.GetAxis("Horizontal");
             float verticalInput = Input.GetAxis("Vertical");
             ApplyInput(horizontalInput, verticalInput);
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            if (stream.IsWriting)
+            {
+                // We own this player: send the data to others
+                stream.SendNext(currentSpeed);
+                stream.SendNext(transform.position);
+                stream.SendNext(transform.rotation);
+            }
+            else
+            {
+                // Network player, receive data
+                currentSpeed = (float)stream.ReceiveNext();
+                Vector3 position = (Vector3)stream.ReceiveNext();
+                Quaternion rotation = (Quaternion)stream.ReceiveNext();
+
+                // Update the transform
+                transform.position = position;
+                transform.rotation = rotation;
+            }
         }
     }
 }

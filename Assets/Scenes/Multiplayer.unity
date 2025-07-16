@@ -656,6 +656,8 @@ MonoBehaviour:
   joinRoomButton: {fileID: 696563506}
   leaveRoomButton: {fileID: 883003250}
   roomItemPrefab: {fileID: 767432232}
+  gameSceneName: Gameplay
+  maxPlayersPerRoom: 2
 --- !u!1 &883003248
 GameObject:
   m_ObjectHideFlags: 0
